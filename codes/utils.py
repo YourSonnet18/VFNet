@@ -6,7 +6,7 @@ import cv2
 def save_image(tensor,img_path):
     img = tensor.squeeze().cpu().detach().numpy()
     img = img.transpose((1,2,0)).clip(0,255)
-    img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+    img = cv2.cvtColor(img, cv2.RGB2GRAY)
     cv2.imwrite(img_path,img)
 
 def calculate_psnr(img1,img2):

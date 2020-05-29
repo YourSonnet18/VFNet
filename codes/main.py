@@ -27,7 +27,7 @@ parser.add_argument('--seed', type=int, default=123, help='random seed to use. D
 parser.add_argument('--gpus', default=1, type=int, help='number of gpu')
 parser.add_argument('--train_dir', type=str, default='../datasets/REDS')
 parser.add_argument('--val_dir', type=str, default='../datasets/dance')
-parser.add_argument('--nFrames', type=int, default=7)
+parser.add_argument('--nFrames', type=int, default=5)
 parser.add_argument('--groups', type=int, default=8)
 parser.add_argument('--front_RBs',type=int, default=5)
 parser.add_argument('--back_RBs',type=int,default=10)
@@ -98,7 +98,7 @@ def train(epoch):
         t0 = time.perf_counter()
         predicton = model(inputs)
         L1loss = L1loss_function(predicton,target)
-        ms_ssim_loss = ms_ssim(predicton,target,size_average=True,data_range=255)
+        ms_ssim_loss = 1-ms_ssim(predicton,target,size_average=True,data_range=255)
         loss = 0.16*L1loss+0.84*ms_ssim_loss
         loss.backward()
         optimizer.step()

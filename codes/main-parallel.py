@@ -101,7 +101,7 @@ def train(epoch):
             target = target.cuda()
         predicton = model(inputs)
         L1loss = L1loss_function(predicton,target)
-        ms_ssim_loss = ms_ssim(predicton,target,size_average=True,data_range=255)
+        ms_ssim_loss = 1-ms_ssim(predicton,target,size_average=True,data_range=255)
         loss = 0.16*L1loss+0.84*ms_ssim_loss
         loss.backward()
         optimizer.step() 
