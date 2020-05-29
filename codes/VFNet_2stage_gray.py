@@ -329,7 +329,7 @@ class VFNet(nn.Module):
         B,N,C,H,W = x.size()
         stage1_out = []
         for i in range(self.nframes):
-            stage1_in = x[:,i:i+nframes,:,:,:].clone()
+            stage1_in = x[:,i:i+self.nframes,:,:,:].clone()
             stage1_out.append(self.Stage1(stage1_in))
         stage2_in = torch.cat(stage1_out,dim=1).view(B,-1,C,H,W)
         stage2_out = self.Stage2(stage2_in)
