@@ -314,7 +314,7 @@ class VFNet_Stage1(nn.Module):
         fea = self.recon_first(fea)
         out = self.lrelu(self.recon_trunk(fea)) 
         out = self.conv_last(out)
-        out += base
+        out += x_center
         return out#B,1,H,W
 
 class VFNet(nn.Module):
