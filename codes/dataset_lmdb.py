@@ -34,8 +34,8 @@ class VideoDataset(data.Dataset):
         env_hr = lmdb.open(path.join(self.image_dir,"HR.lmdb"),readonly=True,
                                      lock=False,readahead=False,meminit=False)
         key = self.keys_lr[index]
-        target = cv2.cvtColor(self.load_img(env_hr,key,self.resolutions_hr[index]),cv2.COLOR_BGR2GRAY).transpose((2,0,1))
-        input = cv2.cvtColor(self.load_img(env_lr,key,self.resolutions_lr[index]),cv2.COLOR_BGR2GRAY).transpose((2,0,1))
+        target = cv2.cvtColor(self.load_img(env_hr,key,self.resolutions_hr[index]),cv2.COLOR_BGR2GRAY)[np.newaxis,:,:]
+        input = cv2.cvtColor(self.load_img(env_lr,key,self.resolutions_lr[index]),cv2.COLOR_BGR2GRAY)[np.newaxis,:,:]
         inputs = []
         name_a,name_b = key.split('_')
         tt = int(self.nFrames/2)
@@ -48,7 +48,7 @@ class VideoDataset(data.Dataset):
             key1 = name_a+"_{:06d}".format(index1)
             if key1 in self.keys_lr:
                 input1 = self.load_img(env_lr,key1,self.resolutions_lr[index])
-                input1 = cv2.cvtColor(input1,cv2.COLOR_BGR2GRAY).transpose((2,0,1))
+                input1 = cv2.cvtColor(input1,cv2.COLOR_BGR2GRAY)[np.newaxis,:,:]
                 inputs.append(input1)
             else:
                 print("neigbor frame-{} is not exist".format(key1))
