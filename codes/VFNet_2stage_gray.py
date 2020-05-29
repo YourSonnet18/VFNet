@@ -321,7 +321,7 @@ class VFNet(nn.Module):
     def __init__(self, nf=64, nframes=5, groups=8, front_RBs=5, back_RBs=10, center=None, upscale_factor=4):
         super(VFNet,self).__init__()
         self.Stage1 = VFNet_Stage1(nf=nf, nframes=nframes, groups=groups, front_RBs=front_RBs, back_RBs=back_RBs, center=None)
-        self.Stage2 = VFNet_Stage2(nf=64, nframes=5, groups=8, front_RBs=5, back_RBs=10, center=None, upscale_factor=4)
+        self.Stage2 = VFNet_Stage2(nf=nf, nframes=nframes, groups=groups, front_RBs=front_RBs, back_RBs=back_RBs, center=None, upscale_factor=4)
         self.nframes = nframes
         self.upscale_factor = upscale_factor
     def forward(self,x):
