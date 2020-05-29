@@ -180,7 +180,7 @@ def make_layer(block, n):
 
 class VFNet_Stage2(nn.Module):
     def __init__(self, nf=64, nframes=5, groups=8, front_RBs=5, back_RBs=10, center=None, upscale_factor=4):
-        super(VFNet_Stage2,self).__init__()
+        super().__init__()
         self.nf = nf
         self.center = nframes // 2 if center is None else center
         self.upscale_factor = upscale_factor
@@ -255,7 +255,7 @@ class VFNet_Stage2(nn.Module):
 
 class VFNet_Stage1(nn.Module):
     def __init__(self, nf=64, nframes=5, groups=8, front_RBs=5, back_RBs=10, center=None):
-        super(VFNet_Stage1,self).__init__()
+        super().__init__()
         self.nf = nf
         self.center = nframes // 2 if center is None else center
 
