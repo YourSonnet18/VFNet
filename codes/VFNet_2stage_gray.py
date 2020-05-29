@@ -312,7 +312,7 @@ class VFNet_Stage1(nn.Module):
         fea = self.ca_fusion(aligned_fea)#B,N*C,H,W
         fea = fea+self.maskNet(xx.permute(0,2,1,3,4))#B,N,C,H,W=>B,C,N,H,W输入,B,N*C,H,W输出
         fea = self.recon_first(fea)
-        out = seff.lrelu(self.recon_trunk(fea)) 
+        out = self.lrelu(self.recon_trunk(fea)) 
         out = self.conv_last(out)
         base = F.interpolate(x_center,scale_factor=self.upscale_factor,mode="bilinear",align_corners=False)
         out += base
