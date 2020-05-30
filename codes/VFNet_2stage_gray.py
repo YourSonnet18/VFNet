@@ -6,6 +6,8 @@ try:
 except ImportError:
     raise ImportError('Failed to import DCNv2 module.')
 
+from torch.utils.checkpoint import checkpoint, checkpoint_sequential
+
 class TempConv(nn.Module):
     '''
     ---conv3d-bn-elu---
@@ -15,7 +17,7 @@ class TempConv(nn.Module):
         self.conv3d = nn.Conv3d(c_in,c_out,kernel_size=k_size,stride=stride,padding=padding)
         self.bn = nn.BatchNorm3d(c_out)
     def forward(self,x):
-        return F.elu(self.bn(self.conv3d(x)), inplace=False)
+        return F.elu(self.bn(self.conv3d(x)), inplace=True)
 class Upscale(TempConv):
     def __init__(self, c_in, c_out, k_size=(3,3,3), stride=(1,1,1),padding=(1,1,1),scale_factor=(1,2,2)):
         super(Upscale,self).__init__(c_in,c_out)
@@ -25,7 +27,7 @@ class Upscale(TempConv):
                                                        scale_factor=self.scale_factor,
                                                        mode="trilinear",
                                                        align_corners=False))),
-                     inplace=False)
+                     inplace=True)
 class MaskNetwork(nn.Module):
     def __init__(self, nf1=64, nf2=128, nf3=256):
         super(MaskNetwork, self).__init__()
@@ -48,7 +50,8 @@ class MaskNetwork(nn.Module):
         )
     def forward(self,x):
         B,C,N,H,W = x.size()
-        y = torch.tanh(self.layers(x))
+        y = checkpoint_sequential(self.layers,3,x)
+        y = torch.tanh(y)
         y = y.permute(0,2,1,3,4).contiguous()
         ## 混合时间和通道两个维度
         return y.view(B,-1,H,W)
@@ -67,7 +70,7 @@ class ResidualBlock_noBN(nn.Module):
         nn.init.kaiming_normal_(self.conv2.weight, a=0, mode="fan_in")
         self.conv2.bias.data.zero_()
     def forward(self, x):
-        y = F.relu(self.conv1(x))
+        y = F.relu(self.conv1(x),inplace=True)
         y = self.conv2(y)
         return x+y
 
@@ -243,7 +246,7 @@ class VFNet_Stage2(nn.Module):
         fea = self.ca_fusion(aligned_fea)#B,N*C,H,W
         fea = fea+self.maskNet(xx.permute(0,2,1,3,4))#B,N,C,H,W=>B,C,N,H,W输入,B,N*C,H,W输出
         fea = self.recon_first(fea)
-        out = self.recon_trunk(fea)
+        out = checkpoint_sequential(self.recon_trunk, 2, fea)
         out = self.lrelu(self.pixel_shuffle(self.upconv1(out)))
         if self.upscale_factor==4:
             out = self.lrelu(self.pixel_shuffle(self.upconv2(out)))
@@ -312,7 +315,8 @@ class VFNet_Stage1(nn.Module):
         fea = self.ca_fusion(aligned_fea)#B,N*C,H,W
         fea = fea+self.maskNet(xx.permute(0,2,1,3,4))#B,N,C,H,W=>B,C,N,H,W输入,B,N*C,H,W输出
         fea = self.recon_first(fea)
-        out = self.lrelu(self.recon_trunk(fea)) 
+        out = checkpoint_sequential(self.recon_trunk, 2, fea)
+        out = self.lrelu(out) 
         out = self.conv_last(out)
         out += x_center
         return out#B,1,H,W
