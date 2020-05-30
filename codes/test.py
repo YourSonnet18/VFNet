@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
-from dataset_lmdb import *
+from dataset_lmdb_color import *
 import os
 import time
 import argparse
@@ -21,6 +21,7 @@ parser.add_argument('--model_folder', default='/share/data/zhaoyanchao/experimen
 parser.add_argument('--pretrained_sr', default='epoch_54.pth', help='sr pretrained base model')
 parser.add_argument('--result_folder', default='/share/data/zhaoyanchao/results/test1')
 parser.add_argument('--test_dir', type=str, default='/dataset/zyc/VF_Validation')
+opt = parser.parse_args()
 # from pytorch_msssim import ms_ssim
 import cv2
 def single_forward(model, inp):
@@ -84,7 +85,7 @@ print("Begin testing...")
 total_frames = 0
 total_psnr = 0
 # cv2.VideoWriter_fourcc(*"mp4v")
-video = cv2.VideoWriter(os.path.join(opt.result_folder,"car.mp4"),cv2.VideoWriter_fourcc(*"mp4v"),25,(1280,720))
+video = cv2.VideoWriter(os.path.join(opt.result_folder,"car.mp4"),-1,25,(1280,720))
 # total_ms_ssim = 0
 with torch.no_grad():
     for i,batch in enumerate(dataloader,1):
@@ -102,6 +103,4 @@ with torch.no_grad():
             #   cv2.imwrite('../results/Car_ensemble/{:06d}.png'.format(total_frames),img)
             video.write(img)
             print("Processing Frame {},PSNR={:.4f}".format(total_frames,psnr))
-        if total_frames ==10:
-            break
     print("Processed {} frames, Avg.PSNR={:.4f}".format(total_frames, total_psnr/total_frames))
