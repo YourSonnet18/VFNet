@@ -17,10 +17,10 @@ parser.add_argument('--nFrames', type=int, default=5)
 parser.add_argument('--groups', type=int, default=8)
 parser.add_argument('--front_RBs',type=int, default=5)
 parser.add_argument('--back_RBs',type=int,default=10)
-parser.add_argument('--model_folder', default='../experiments/', help='Location to save checkpoint models')
-parser.add_argument('--pretrained_sr', default='3x_dl10VDBPNF7_epoch_84.pth', help='sr pretrained base model')
-parser.add_argument('--result_folder', default='3x_dl10VDBPNF7_epoch_84.pth', help='sr pretrained base model')
-parser.add_argument('--test_dir', type=str, default='../datasets/dance')
+parser.add_argument('--model_folder', default='/share/data/zhaoyanchao/experiment1', help='Location to save checkpoint models')
+parser.add_argument('--pretrained_sr', default='epoch_54.pth', help='sr pretrained base model')
+parser.add_argument('--result_folder', default='/share/data/zhaoyanchao/results/test1')
+parser.add_argument('--test_dir', type=str, default='/dataset/zyc/VF_Validation')
 # from pytorch_msssim import ms_ssim
 import cv2
 def single_forward(model, inp):
@@ -73,7 +73,7 @@ batch_size=2
 
 print("Making model...")
 from VFNet import VFNet
-model = VFNet(nf=64, nframes=5, groups=8,front_RBs=5,back_RBs=10,upscale_factor=4)
+model = VFNet(nf=64, nframes=opt.nFrames, groups=opt.groups,front_RBs=opt.front_RBs,back_RBs=opt.back_RBs,upscale_factor=4)
 model = model.cuda()
 model = nn.DataParallel(model)
 model.load_state_dict(torch.load(os.path.join(opt.model_folder,opt.pretrained_sr)))
