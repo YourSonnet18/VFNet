@@ -246,7 +246,7 @@ class VFNet_Stage2(nn.Module):
         fea = self.ca_fusion(aligned_fea)#B,N*C,H,W
         fea = fea+self.maskNet(xx.permute(0,2,1,3,4))#B,N,C,H,W=>B,C,N,H,W输入,B,N*C,H,W输出
         fea = self.recon_first(fea)
-        out = checkpoint_sequential(self.recon_trunk, 2, fea)
+        out = checkpoint(self.recon_trunk, fea)
         out = self.lrelu(self.pixel_shuffle(self.upconv1(out)))
         if self.upscale_factor==4:
             out = self.lrelu(self.pixel_shuffle(self.upconv2(out)))
@@ -315,7 +315,7 @@ class VFNet_Stage1(nn.Module):
         fea = self.ca_fusion(aligned_fea)#B,N*C,H,W
         fea = fea+self.maskNet(xx.permute(0,2,1,3,4))#B,N,C,H,W=>B,C,N,H,W输入,B,N*C,H,W输出
         fea = self.recon_first(fea)
-        out = checkpoint_sequential(self.recon_trunk, 2, fea)
+        out = checkpoint(self.recon_trunk, fea)
         out = self.lrelu(out) 
         out = self.conv_last(out)
         out += x_center
