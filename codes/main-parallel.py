@@ -123,7 +123,7 @@ def validation(epoch,model,total_steps):
     val_prediction = model(val_inputs)#B=1,C,H,W
     save_image(val_prediction[0],os.path.join(opt.save_folder,"Epoch{}it{}_SR.png".format(epoch,total_steps)))
     save_image(val_target[0],os.path.join(opt.save_folder,"Epoch{}it{}_HR.png".format(epoch,total_steps)))
-    save_image(val_inputs[0,opt.nFrames//2,:,:,:],os.path.join(opt.save_folder,"Epoch{}it{}_LR.png".format(epoch,total_steps)))
+    save_image(val_inputs[0,opt.nFrames-1,:,:,:],os.path.join(opt.save_folder,"Epoch{}it{}_LR.png".format(epoch,total_steps)))
     psnr = calculate_psnr(val_prediction[0],val_target[0])
     logger.info("Validation PSNR:{:.4f}".format(psnr))
 def checkpoint(epoch):
