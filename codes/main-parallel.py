@@ -117,7 +117,7 @@ def train(epoch):
                 validation(epoch,model,total_steps)
         if total_steps%5==0:
             t1 = time.perf_counter()
-            logger.info("===> Epoch[{}]({}/{}): Loss: {:.4f} || Timer: {:.4f} sec.".format(epoch,it,len(train_data_loader),loss.item(),(t1-t0)))
+            logger.info("===> Epoch[{}]({}/{}): Loss{:.4f}=L1 {:.4f}+MSSSIM {:.4f} || Timer: {:.4f} sec.".format(epoch,it,len(train_data_loader),loss.item(),L1loss.item(),ms_ssim_loss.item(),(t1-t0)))
     temp_psnr = calculate_psnr(predicton[0],target[0])
     logger.info("===> Epoch {} Complete: Avg. Loss: {:.4f} || temp_PSNR: {:.4f}".format(epoch, epoch_loss / len(train_data_loader), temp_psnr))
 
