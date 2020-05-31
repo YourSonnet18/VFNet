@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
-torch.set_num_threads(4)
 import os
 import time
 import argparse
@@ -21,7 +20,7 @@ parser.add_argument('--nEpochs', type=int, default=150, help='number of epochs t
 parser.add_argument('--snapshots', type=int, default=30, help='Snapshots')
 parser.add_argument('--lr', type=float, default=1e-4, help='Learning Rate. Default=0.01')
 parser.add_argument('--mode', type=int, default=1)
-parser.add_argument('--threads', type=int, default=8, help='number of threads for data loader to use')
+parser.add_argument('--threads', type=int, default=4, help='number of threads for data loader to use')
 parser.add_argument('--seed', type=int, default=123, help='random seed to use. Default=123')
 parser.add_argument('--gpus', default=1, type=int, help='number of gpu')
 parser.add_argument('--data_type', type=str, default='lmdb')
@@ -40,6 +39,8 @@ parser.add_argument('--pretrained', type=bool, default=False)
 parser.add_argument('--save_folder', default='../experiments/', help='Location to save checkpoint models')
 # parser.add_argument('--prefix', default='F7', help='Location to save checkpoint models')
 opt = parser.parse_args()
+
+torch.set_num_threads(opt.threads)
 
 logger =  logging.getLogger("base")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s-%(message)s")
