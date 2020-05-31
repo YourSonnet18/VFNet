@@ -77,7 +77,7 @@ if torch.cuda.is_available():
 ## utils
 
 L1loss_function = nn.L1Loss()
-optimizer = optim.Adam(model.parameters(),lr=1e-6,betas=(0.9,0.99))
+optimizer = optim.Adam(model.parameters(),lr=opt.lr,betas=(0.9,0.99))
 epochs = opt.nEpochs
 total_steps = 0
 
