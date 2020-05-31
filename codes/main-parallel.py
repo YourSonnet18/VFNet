@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
+
 import os
 import time
 import argparse
@@ -64,6 +65,8 @@ val_data_iter = iter(val_data_loader)
 logger.info('===> Building model {}'.format(opt.mode))
 if opt.mode==1:
     from VFNet import VFNet
+elif opt.mode==3:
+    from VFNet_2stage_gray import VFNet
 else:
     from VFNet2 import VFNet
 model = VFNet(nf=64, nframes=opt.nFrames, groups=opt.groups,front_RBs=opt.front_RBs,back_RBs=opt.back_RBs,upscale_factor=opt.upscale_factor)
