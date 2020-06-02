@@ -36,10 +36,10 @@ def make_lmdb(folder,R,name_a,txn,keys,resolutions):
         key = "{:03d}_".format(name_a)+path.splitext(x)[0]
         keys.append(key)
         key_byte = key.encode("ascii")
-        data = cv2.imread(path.join(opt.dataset,R,folder,x))
-        H,W,C = data.shape
+        data = cv2.imread(path.join(opt.dataset,R,folder,x),cv2.IMREAD_GRAYSCALE)
+        H,W = data.shape
         txn.put(key_byte,data, overwrite=True)
-        resolutions.append("{:d}_{:d}_{:d}".format(C,H,W))
+        resolutions.append("{:d}_{:d}".format(H,W))
     return txn,keys,resolutions
 txn_lr,env_lr = make_env("LR")
 txn_hr,env_hr = make_env("HR")
