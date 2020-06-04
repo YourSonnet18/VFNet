@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
-from dataset_lmdb_color import *
 import os
 import time
 import argparse
@@ -21,6 +20,8 @@ parser.add_argument('--model_folder', default='/share/data/zhaoyanchao/experimen
 parser.add_argument('--pretrained_sr', default='epoch_54.pth', help='sr pretrained base model')
 parser.add_argument('--result_folder', default='/share/data/zhaoyanchao/results/test1')
 parser.add_argument('--test_dir', type=str, default='/dataset/zyc/VF_Validation')
+parser.add_argument('--GT',type=bool,default=False)
+parser.add_argument('--format',type=str,default="png")
 opt = parser.parse_args()
 # from pytorch_msssim import ms_ssim
 import cv2
@@ -79,28 +80,48 @@ model = model.cuda()
 model = nn.DataParallel(model)
 model.load_state_dict(torch.load(os.path.join(opt.model_folder,opt.pretrained_sr)))
 print("Preparing data...")
+if opt.format=="video":
+    from dataset_video import *
+elif opt.format=="png":
+    from dataset import *
+elif opt.format=="lmdb":
+    from dataset_lmdb_color import *
 dataset = VideoDataset(opt.test_dir,opt.nFrames)
 dataloader = DataLoader(dataset=dataset,batch_size=batch_size,shuffle=False)
 print("Begin testing...")
 total_frames = 0
 total_psnr = 0
 # cv2.VideoWriter_fourcc(*"mp4v")
-video = cv2.VideoWriter(os.path.join(opt.result_folder,"car.mp4"),-1,25,(1280,720))
+file_name = os.path.basename(opt.test_dir)
+initialize = True
 # total_ms_ssim = 0
 with torch.no_grad():
     for i,batch in enumerate(dataloader,1):
-        inputs,target = batch[0].float(),batch[1].float()
+        if opt.GT:
+            inputs,target = batch[0].float(),batch[1].float()
+        else:
+            inputs = batch.float()
         inputs = inputs.cuda()
 
         prediction = flipx4_forward(model,inputs)
         for j in range(batch_size):
-            psnr = calculate_psnr(prediction[j],target[j])
-            total_psnr += psnr
+            if opt.GT:
+                psnr = calculate_psnr(prediction[j],target[j])
+                total_psnr += psnr
             total_frames += 1
             img = prediction[j].squeeze().cpu().detach().numpy()
             img = img.transpose((1,2,0)).clip(0,255).astype(np.uint8)
             img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
             #   cv2.imwrite('../results/Car_ensemble/{:06d}.png'.format(total_frames),img)
+            if initialize:
+                video = cv2.VideoWriter(os.path.join(opt.result_folder,file_name),-1,25,(img.shape[2],img.shape[1]))
+                initialize = False
             video.write(img)
-            print("Processing Frame {},PSNR={:.4f}".format(total_frames,psnr))
-    print("Processed {} frames, Avg.PSNR={:.4f}".format(total_frames, total_psnr/total_frames))
+            if opt.GT:
+                print("Processing Frame {},PSNR={:.4f}".format(total_frames,psnr))
+            else:
+                print("Processing Frame {}".format(total_frames))
+    if opt.GT:
+        print("Processed {} frames, Avg.PSNR={:.4f}".format(total_frames, total_psnr/total_frames))
+    else:
+        print("Processed {} frames".format(total_frames))
