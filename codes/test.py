@@ -16,6 +16,7 @@ parser.add_argument('--nFrames', type=int, default=5)
 parser.add_argument('--groups', type=int, default=8)
 parser.add_argument('--front_RBs',type=int, default=5)
 parser.add_argument('--back_RBs',type=int,default=10)
+parser.add_argument('--batchSize', type=int, default=2, help='testing batch size')
 parser.add_argument('--model_folder', default='/share/data/zhaoyanchao/experiment1', help='Location to save checkpoint models')
 parser.add_argument('--pretrained_sr', default='epoch_54.pth', help='sr pretrained base model')
 parser.add_argument('--result_folder', default='/share/data/zhaoyanchao/results/test1')
@@ -70,7 +71,7 @@ def flipx4_forward(model, inp):
 
 
 # parameters
-batch_size=2
+batch_size=opt.batchSize
 
 
 print("Making model...")
@@ -92,7 +93,7 @@ print("Begin testing...")
 total_frames = 0
 total_psnr = 0
 # cv2.VideoWriter_fourcc(*"mp4v")
-file_name = os.path.basename(opt.test_dir)
+file_name = os.path.basename(opt.test_dir).split('.')[0]
 initialize = True
 # total_ms_ssim = 0
 with torch.no_grad():
@@ -110,17 +111,19 @@ with torch.no_grad():
                 total_psnr += psnr
             total_frames += 1
             img = prediction[j].squeeze().cpu().detach().numpy()
-            img = img.transpose((1,2,0)).clip(0,255).astype(np.uint8)
+            img = img.transpose((1,2,0)).clip(0,255).astype(np.uint8)#H,W,C
             img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
             #   cv2.imwrite('../results/Car_ensemble/{:06d}.png'.format(total_frames),img)
             if initialize:
-                video = cv2.VideoWriter(os.path.join(opt.result_folder,file_name),-1,25,(img.shape[2],img.shape[1]))
+                fourcc = cv2.VideoWriter_fourcc(*'XVID')
+                video = cv2.VideoWriter(os.path.join(opt.result_folder,file_name+'.avi'),fourcc,25,(img.shape[1],img.shape[0]))
                 initialize = False
             video.write(img)
             if opt.GT:
                 print("Processing Frame {},PSNR={:.4f}".format(total_frames,psnr))
             else:
                 print("Processing Frame {}".format(total_frames))
+        
     if opt.GT:
         print("Processed {} frames, Avg.PSNR={:.4f}".format(total_frames, total_psnr/total_frames))
     else:
